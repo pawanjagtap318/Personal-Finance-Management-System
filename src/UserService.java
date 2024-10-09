@@ -16,6 +16,7 @@ public class UserService {
     private InvestmentHeap investmentHeap = new InvestmentHeap();
 
     private int currentUserId;
+    public double saving;
 
 //    Register User
     public void registerUser() {
@@ -73,7 +74,7 @@ public class UserService {
                 if (storedPassword.equals(password)) {
                     currentUserId = rs.getInt("user_id");  // Ensure currentUserId is set
                     double currentSalary = rs.getDouble("salary");
-                    double saving = rs.getDouble("saving");
+                    saving = rs.getDouble("saving");
                     Timestamp registrationTimestamp = rs.getTimestamp("registration_date");
                     LocalDate registrationDate = registrationTimestamp.toLocalDateTime().toLocalDate();
 
@@ -153,16 +154,16 @@ public class UserService {
                 }
 
                 // Deduct the expense amount from the saving
-                double updatedSaving = currentSaving - amount;
+                saving -= amount;
 
                 // 2. Update the user's saving in the database
                 String sqlUpdateSaving = "UPDATE users SET saving = ? WHERE user_id = ?";
                 PreparedStatement stmtUpdateSaving = conn.prepareStatement(sqlUpdateSaving);
-                stmtUpdateSaving.setDouble(1, updatedSaving);
+                stmtUpdateSaving.setDouble(1, saving);
                 stmtUpdateSaving.setInt(2, currentUserId);
                 stmtUpdateSaving.executeUpdate();
 
-                System.out.println("Expense added successfully." + " | New Saving: " + updatedSaving + " | Date: " + expenseDate);
+                System.out.println("Expense added successfully." + " | Saving: " + saving + " | Date: " + expenseDate);
             } else {
                 System.out.println("Error: User not found.");
                 return;
@@ -218,6 +219,9 @@ public class UserService {
         }
     }
 
+    public void showSaving(){
+        System.out.println("Saving: " + saving);
+    }
 
     public void showBudget() {
         budgetHash.showBudgets();
