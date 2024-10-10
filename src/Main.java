@@ -23,9 +23,10 @@ public class Main {
         while (true) {
             System.out.println("\n1. Add Expense");
             System.out.println("2. Show Expenses");
-            System.out.println("3. Show Saving");
-            System.out.println("4. Show Budget");
-            System.out.println("5. Exit");
+            System.out.println("3. Saving");
+            System.out.println("4. Show Budget Breakdown");
+            System.out.println("5. Track Investment Growth");
+            System.out.println("6. Exit");
 
             int option = scanner.nextInt();
             switch (option) {
@@ -41,9 +42,12 @@ public class Main {
                     userService.showSaving();  // Show current saving amount
                     break;
                 case 4:
-                    userService.showBudget();
+                    userService.showBudgetBreakdown();
                     break;
                 case 5:
+                    userService.trackInvestmentGrowth();
+                    break;
+                case 6:
                     System.exit(0);
                 default:
                     System.out.println("Invalid option. Please try again.");

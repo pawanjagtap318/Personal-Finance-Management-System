@@ -18,4 +18,16 @@ public class BudgetHash {
             System.out.println("Category: " + category + ", Budget: " + budgetHash.get(category));
         }
     }
+
+    public void hashBudgetCategories(User user) {
+        budgetHash.put("Loan EMI", user.getLoanEmi());
+        budgetHash.put("SIP Investment", user.getSipInvestment());
+        budgetHash.put("Rent", user.getRent());
+    }
+
+    public void displayBudgetCategories() {
+        for (String key : budgetHash.keySet()) {
+            System.out.println(key + ": " + budgetHash.get(key));
+        }
+    }
 }
