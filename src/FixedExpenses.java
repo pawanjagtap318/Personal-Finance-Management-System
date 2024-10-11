@@ -52,8 +52,6 @@ public class FixedExpenses {
         }
     }
 
-
-
     public void applyEmiDeduction(int userId) {
         try {
             Connection conn = DatabaseConnection.getConnection();
@@ -70,38 +68,44 @@ public class FixedExpenses {
 
                 LocalDate currentDate = LocalDate.now();
                 LocalDate lastDeductionDate = (lastEmiDeduction == null) ? emiStartDate.toLocalDate() : lastEmiDeduction.toLocalDate();
-                int monthsMissed = 0;
 
-                // Calculate how many months have passed since the last EMI deduction
+                // Ensure the EMI is not deducted multiple times in the same month
                 if (loanEmi > 0 && emiStartDate != null && currentDate.isAfter(lastDeductionDate)) {
-                    monthsMissed = Period.between(lastDeductionDate, currentDate).getMonths();
+                    Period periodSinceLastDeduction = Period.between(lastDeductionDate, currentDate);
 
-                    // this part to deduct EMI if any months are missed, regardless of exact day match
-                    if (currentDate.getDayOfMonth() >= emiStartDate.toLocalDate().getDayOfMonth()) {
-                        monthsMissed++;  // Include the current month
-                    }
+                    // Check if it's a new month since the last EMI deduction
+                    if (periodSinceLastDeduction.getMonths() > 0 || periodSinceLastDeduction.getYears() > 0) {
+                        // Calculate missed months (if any)
+                        int monthsMissed = Period.between(lastDeductionDate, currentDate).getMonths();
+                        monthsMissed += (currentDate.getYear() - lastDeductionDate.getYear()) * 12;
 
-                    if (monthsMissed > 0) {
-                        // Deduct EMI for each missed month
-                        double totalEmiDeduction = loanEmi * monthsMissed;
-                        saving -= totalEmiDeduction;
+                        if (currentDate.getDayOfMonth() >= emiStartDate.toLocalDate().getDayOfMonth()) {
+                            monthsMissed++;  // Include the current month
+                        }
 
-                        System.out.println("EMI deducted for " + monthsMissed + " months: ₹" + totalEmiDeduction);
+                        if (monthsMissed > 0) {
+                            // Deduct EMI for each missed month
+                            double totalEmiDeduction = loanEmi * monthsMissed;
+                            saving -= totalEmiDeduction;
 
-                        // Update the saving and last EMI deduction date
-                        String updateSql = "UPDATE users SET saving = ?, last_emi_ded = ? WHERE user_id = ?";
-                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
-                        updateStmt.setDouble(1, saving);
-                        updateStmt.setDate(2, Date.valueOf(currentDate));  // Update to today's date
-                        updateStmt.setInt(3, userId);
-                        updateStmt.executeUpdate();
+                            System.out.println("EMI deducted for " + monthsMissed + " months: ₹" + totalEmiDeduction);
 
-                        System.out.println("Updated EMI deductions. New saving: ₹" + saving);
+                            // Update the saving and last EMI deduction date
+                            String updateSql = "UPDATE users SET saving = ?, last_emi_ded = ? WHERE user_id = ?";
+                            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                            updateStmt.setDouble(1, saving);
+                            updateStmt.setDate(2, Date.valueOf(currentDate));  // Update to today's date
+                            updateStmt.setInt(3, userId);
+                            updateStmt.executeUpdate();
+
+                            System.out.println("Updated EMI deductions. New saving: ₹" + saving);
+                        } else {
+                            System.out.println("No EMI deduction required for today.");
+                        }
                     } else {
-                        System.out.println("No EMI deduction required for today.");
+                        System.out.println("EMI already deducted for this month.");
                     }
-                }
-                else if(loanEmi == 0 || emiStartDate == null) {
+                } else if (loanEmi == 0 || emiStartDate == null) {
                     System.out.println("No EMI is set.");
                 } else {
                     System.out.println("No EMI deduction required for today.");
@@ -112,7 +116,6 @@ public class FixedExpenses {
             e.printStackTrace();
         }
     }
-
 
     public void applySipDeduction(int userId) {
         try {
@@ -130,38 +133,44 @@ public class FixedExpenses {
 
                 LocalDate currentDate = LocalDate.now();
                 LocalDate lastDeductionDate = (lastSipDeduction == null) ? sipStartDate.toLocalDate() : lastSipDeduction.toLocalDate();
-                int monthsMissed = 0;
 
-                // Calculate how many months have passed since the last SIP deduction
+                // Ensure the SIP is not deducted multiple times in the same month
                 if (sipInvestment > 0 && sipStartDate != null && currentDate.isAfter(lastDeductionDate)) {
-                    monthsMissed = Period.between(lastDeductionDate, currentDate).getMonths();
+                    Period periodSinceLastDeduction = Period.between(lastDeductionDate, currentDate);
 
-                    // this part to deduct SIP if any months are missed, regardless of exact day match
-                    if (currentDate.getDayOfMonth() >= sipStartDate.toLocalDate().getDayOfMonth()) {
-                        monthsMissed++;  // Include the current month
-                    }
+                    // Check if it's a new month since the last SIP deduction
+                    if (periodSinceLastDeduction.getMonths() > 0 || periodSinceLastDeduction.getYears() > 0) {
+                        // Calculate missed months (if any)
+                        int monthsMissed = Period.between(lastDeductionDate, currentDate).getMonths();
+                        monthsMissed += (currentDate.getYear() - lastDeductionDate.getYear()) * 12;
 
-                    if (monthsMissed > 0) {
-                        // Deduct SIP for each missed month
-                        double totalSipDeduction = sipInvestment * monthsMissed;
-                        saving -= totalSipDeduction;
+                        if (currentDate.getDayOfMonth() >= sipStartDate.toLocalDate().getDayOfMonth()) {
+                            monthsMissed++;  // Include the current month
+                        }
 
-                        System.out.println("SIP deducted for " + monthsMissed + " months: ₹" + totalSipDeduction);
+                        if (monthsMissed > 0) {
+                            // Deduct SIP for each missed month
+                            double totalSipDeduction = sipInvestment * monthsMissed;
+                            saving -= totalSipDeduction;
 
-                        // Update the saving and last SIP deduction date
-                        String updateSql = "UPDATE users SET saving = ?, last_sip_ded = ? WHERE user_id = ?";
-                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
-                        updateStmt.setDouble(1, saving);
-                        updateStmt.setDate(2, Date.valueOf(currentDate));  // Update to today's date
-                        updateStmt.setInt(3, userId);
-                        updateStmt.executeUpdate();
+                            System.out.println("SIP deducted for " + monthsMissed + " months: ₹" + totalSipDeduction);
 
-                        System.out.println("Updated SIP deductions. New saving: ₹" + saving);
+                            // Update the saving and last SIP deduction date
+                            String updateSql = "UPDATE users SET saving = ?, last_sip_ded = ? WHERE user_id = ?";
+                            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                            updateStmt.setDouble(1, saving);
+                            updateStmt.setDate(2, Date.valueOf(currentDate));  // Update to today's date
+                            updateStmt.setInt(3, userId);
+                            updateStmt.executeUpdate();
+
+                            System.out.println("Updated SIP deductions. New saving: ₹" + saving);
+                        } else {
+                            System.out.println("No SIP deduction required for today.");
+                        }
                     } else {
-                        System.out.println("No SIP deduction required for today.");
+                        System.out.println("SIP already deducted for this month.");
                     }
-                }
-                else if(sipInvestment == 0 || sipStartDate == null) {
+                } else if (sipInvestment == 0 || sipStartDate == null) {
                     System.out.println("No SIP is set.");
                 } else {
                     System.out.println("No SIP deduction required for today.");
@@ -189,47 +198,51 @@ public class FixedExpenses {
 
                 LocalDate currentDate = LocalDate.now();
                 LocalDate lastDeductionDate = (lastRentDeduction == null) ? rentStartDate.toLocalDate() : lastRentDeduction.toLocalDate();
-                int monthsMissed = 0;
 
-                // Calculate how many months have passed since the last rent deduction
+                // Ensure the rent is not deducted multiple times in the same month
                 if (rent > 0 && rentStartDate != null && currentDate.isAfter(lastDeductionDate)) {
-                    monthsMissed = Period.between(lastDeductionDate, currentDate).getMonths();
+                    Period periodSinceLastDeduction = Period.between(lastDeductionDate, currentDate);
 
-                    // this part to deduct RENT if any months are missed, regardless of exact day match
-                    if (currentDate.getDayOfMonth() >= rentStartDate.toLocalDate().getDayOfMonth()) {
-                        monthsMissed++;  // Include the current month
-                    }
+                    // Check if it's a new month since the last rent deduction
+                    if (periodSinceLastDeduction.getMonths() > 0 || periodSinceLastDeduction.getYears() > 0) {
+                        // Calculate missed months (if any)
+                        int monthsMissed = Period.between(lastDeductionDate, currentDate).getMonths();
+                        monthsMissed += (currentDate.getYear() - lastDeductionDate.getYear()) * 12;
 
-                    if (monthsMissed > 0) {
-                        // Deduct rent for each missed month
-                        double totalRentDeduction = rent * monthsMissed;
-                        saving -= totalRentDeduction;
+                        if (currentDate.getDayOfMonth() >= rentStartDate.toLocalDate().getDayOfMonth()) {
+                            monthsMissed++;  // Include the current month
+                        }
 
-                        System.out.println("Rent deducted for " + monthsMissed + " months: ₹" + totalRentDeduction);
+                        if (monthsMissed > 0) {
+                            // Deduct rent for each missed month
+                            double totalRentDeduction = rent * monthsMissed;
+                            saving -= totalRentDeduction;
 
-                        // Update the saving and last rent deduction date
-                        String updateSql = "UPDATE users SET saving = ?, last_rent_ded = ? WHERE user_id = ?";
-                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
-                        updateStmt.setDouble(1, saving);
-                        updateStmt.setDate(2, Date.valueOf(currentDate));  // Update to today's date
-                        updateStmt.setInt(3, userId);
-                        updateStmt.executeUpdate();
+                            System.out.println("Rent deducted for " + monthsMissed + " months: ₹" + totalRentDeduction);
 
-                        System.out.println("Updated Rent deductions. New saving: ₹" + saving);
+                            // Update the saving and last rent deduction date
+                            String updateSql = "UPDATE users SET saving = ?, last_rent_ded = ? WHERE user_id = ?";
+                            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                            updateStmt.setDouble(1, saving);
+                            updateStmt.setDate(2, Date.valueOf(currentDate));  // Update to today's date
+                            updateStmt.setInt(3, userId);
+                            updateStmt.executeUpdate();
+
+                            System.out.println("Updated Rent deductions. New saving: ₹" + saving);
+                        } else {
+                            System.out.println("No Rent deduction required for today.");
+                        }
                     } else {
-                        System.out.println("No Rent deduction required for today.");
+                        System.out.println("Rent already deducted for this month.");
                     }
-                }
-                else if(rent == 0 || rentStartDate == null) {
-                    System.out.println("No RENT is set.");
+                } else if (rent == 0 || rentStartDate == null) {
+                    System.out.println("No Rent is set.");
                 } else {
-                    System.out.println("No RENT deduction required for today.");
+                    System.out.println("No Rent deduction required for today.");
                 }
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 }

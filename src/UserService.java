@@ -18,8 +18,11 @@ public class UserService {
 
     FixedExpenses fixedExpenses = new FixedExpenses();
 
-    private int currentUserId;
+    public int currentUserId;
     public double saving;
+    public double loanEmi;
+    public double rent;
+    public double sipInvestment;
 
 //    Register User
     public void registerUser() {
@@ -33,11 +36,11 @@ public class UserService {
         saveSalary(salary);
         // Set up monthly expenses: Loan EMI, Investment (SIP), Rent
         System.out.println("Set your Loan EMI: ");
-        double loanEmi = scanner.nextDouble();
+        loanEmi = scanner.nextDouble();
         System.out.println("Set your monthly Rent: ");
-        double rent = scanner.nextDouble();
+        rent = scanner.nextDouble();
         System.out.println("Set your monthly Investment (SIP): ");
-        double sipInvestment = scanner.nextDouble();
+        sipInvestment = scanner.nextDouble();
 //        System.out.println("Enter Investment Symbol for tracking: ");
 //        String investmentSymbol = scanner.next();
 
@@ -89,9 +92,6 @@ public class UserService {
             String sql = "SELECT user_id, password, salary, registration_date, saving FROM users WHERE username = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
-//            @@@@@@@@@@@@@@@@@
-//            stmt.executeUpdate();
-//            @@@@@@@@@@@@@@@@@@
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -132,6 +132,7 @@ public class UserService {
 
                 } else {
                     System.out.println("Incorrect password.");
+                    System.exit(0);
                 }
             } else {
                 System.out.println("User not found.");
@@ -285,9 +286,9 @@ public class UserService {
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                double loanEmi = resultSet.getDouble("loan_emi");
-                double sipInvestment = resultSet.getDouble("sip_invst");
-                double rent = resultSet.getDouble("rent");
+                loanEmi = resultSet.getDouble("loan_emi");
+                sipInvestment = resultSet.getDouble("sip_invst");
+                rent = resultSet.getDouble("rent");
 
                 System.out.println("Budget Breakdown for User ID: " + currentUserId);
                 System.out.println("Loan EMI: " + loanEmi);

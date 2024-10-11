@@ -12,7 +12,6 @@ public class User {
     private double sipInvestment;
     private double rent;
     private LocalDateTime registrationDate;
-    private String investmentSymbol;
 
     // Constructor
     public User(int userId, String username, String password, double salary) {

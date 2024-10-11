@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         UserService userService = new UserService();
+        BudgetHash budgetHash = new BudgetHash();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -25,8 +26,9 @@ public class Main {
             System.out.println("2. Show Expenses");
             System.out.println("3. Saving");
             System.out.println("4. Show Budget Breakdown");
-            System.out.println("5. Track Investment Growth");
-            System.out.println("6. Exit");
+            System.out.println("5. Edit Budget");
+            System.out.println("6. Track Investment Growth");
+            System.out.println("7. Exit");
 
             int option = scanner.nextInt();
             switch (option) {
@@ -45,9 +47,12 @@ public class Main {
                     userService.showBudgetBreakdown();
                     break;
                 case 5:
-                    userService.trackInvestmentGrowth();
+                    budgetHash.editBudget(userService.currentUserId);
                     break;
                 case 6:
+                    userService.trackInvestmentGrowth();
+                    break;
+                case 7:
                     System.exit(0);
                 default:
                     System.out.println("Invalid option. Please try again.");
